@@ -1,0 +1,42 @@
+version: "3.9"
+services:
+  database:
+    image: mysql:5.7
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - clarus-net
+    environment:
+      - MYSQL_ROOT_PASSWORD=P123456p
+      - MYSQL_DATABASE=phonebook_db
+      - MMYSQL_USER=dmin
+      - MYSQL_PASSWORD=Clarusway_1
+    configs:
+      - source: init_table
+        target: /docker-entrypoint-initdb.d/init.sql
+
+  app-server:
+    image: $ECR-REPO:latest
+    deploy:
+      mode: global
+      update_config:
+        parallelism: 1
+        delay: 5s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "80:80"
+    networks:
+      - clarus-net
+
+
+volumes:
+  db-data:
+
+networks:
+  clarus-net:
+
+configs:
+  init_table:
+    file: ./init.sql
